@@ -3,7 +3,7 @@
 `x-is-type` is a minimal package for simple type-checks of basic types, mainly
 intended to reduce repetition and increase readability when doing type checking.
 
-Package is bundled using [microbundle](https://www.npmjs.com/package/microbundle)
+Package is bundled using [unbuild](https://www.npmjs.com/package/unbuild)
 
 ## Installation
 
