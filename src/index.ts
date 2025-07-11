@@ -166,7 +166,7 @@ export function isFloat(x: unknown): x is number;
 export function isFloat(x: unknown): x is number {
     if (!isNumber(x)) return false;
     const r = x % 1;
-    return !Number.isNaN(r) && r !== 0;
+    return r !== 0 && !Number.isNaN(r);
 }
 
 /**

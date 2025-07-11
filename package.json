@@ -4,18 +4,11 @@
     "description": "A minimal package for simple type-checks of basic types",
     "type": "module",
     "main": "./dist/index.cjs",
-    "module": "./dist/index.mjs",
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
-            "require": {
-                "default": "./dist/index.cjs",
-                "types": "./dist/index.d.cts"
-            },
-            "import": {
-                "default": "./dist/index.mjs",
-                "types": "./dist/index.d.mts"
-            }
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.cjs"
         }
     },
     "scripts": {
