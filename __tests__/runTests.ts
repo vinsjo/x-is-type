@@ -83,4 +83,8 @@ export const runTests = createRunTests({
         args(null, undefined, false, 0, '', NaN),
         args(1, ' ', true, [], {}),
     ],
+    isRegularObj: [
+        args(null, '', Symbol(1), [], new Set(), new Map()),
+        args({}, { foo: 'bar' }, { a: 1, b: 2 }, { x: 'y' }),
+    ],
 });
