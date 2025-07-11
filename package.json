@@ -15,7 +15,7 @@
         "types": "./dist/index.d.ts"
     },
     "scripts": {
-        "build": "del-cli dist && microbundle src/index.ts --compress --no-sourcemap && npm run test:build",
+        "build": "del-cli dist && microbundle src/index.ts --compress --no-sourcemap",
         "dev": "microbundle watch",
         "lint": "eslint src/** __tests__/** --ext .ts",
         "format": "prettier --write .",
@@ -24,7 +24,7 @@
         "test:coverage": "jest --coverage",
         "pre-commit": "npm test && pretty-quick --staged",
         "pre-push": "npm test && npm run lint",
-        "prepublishOnly": "npm run pre-push && npm run build",
+        "prepublishOnly": "npm run pre-push && npm run build && npm run test:build",
         "prepare": "husky install"
     },
     "files": [

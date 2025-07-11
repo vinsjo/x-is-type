@@ -19,7 +19,7 @@ export type AnyFunctionType = (...args: unknown[]) => unknown;
 export type AnyConstructorType = abstract new (...args: unknown[]) => unknown;
 
 /**
- * Type representation of a falsy value.
+ * Type representation of any falsy value.
  *
  * This is not a complete type to represent all falsy values in JavaScript,
  * since Typescript doesn't have a type for `NaN`.
