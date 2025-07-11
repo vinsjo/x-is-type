@@ -1,6 +1,6 @@
 {
     "name": "x-is-type",
-    "version": "1.2.9",
+    "version": "1.2.10",
     "description": "A minimal package for simple type-checks of basic types",
     "type": "module",
     "source": "./src/index.ts",
