@@ -1,6 +1,7 @@
 # x-is-type
 
-`x-is-type` is a minimal package for simple type-checks of basic types.
+`x-is-type` is a minimal package for simple type-checks of basic types, mainly
+intended to reduce repetition and increase readability when doing type checking.
 
 Package is bundled using [microbundle](https://www.npmjs.com/package/microbundle)
 
@@ -8,13 +9,13 @@ Package is bundled using [microbundle](https://www.npmjs.com/package/microbundle
 
 `npm i x-is-type`
 
-### In Node.js
+### Importing
 
 ```js
 // ESM:
-import { isNum, isStr, isObj } from 'x-is-type';
+import { isNumber, isString, isObject } from 'x-is-type';
 // CommonJS:
-const { isNum, isStr, isObj } = require('x-is-type');
+const { isNumber, isString, isObject } = require('x-is-type');
 ```
 
 ## Usage
@@ -53,20 +54,13 @@ isStr(new String()); // => false
 isBool(false); // => true
 isBool(null); // => false
 
-/**
- * Check if typeof value is 'object',
- * not null and instances of ObjectConstructor
- */
+/** Check if value is not null and typeof value is 'object' */
 isObject({ foo: 'bar' }); // => true
 isObject([]); // => true
 isObject(new Set()); // => true
 isObject(null); // => false
 
-/**
- * Check if value is an array.
- *
- * Uses `Array.isArray`, but with slightly different type definition.
- */
+/** Check if value is an array (uses Array.isArray) */
 isArray([1, 2, 3]); // => true
 isArray({}); // => false
 
@@ -91,13 +85,9 @@ isNullish(''); // => false
 isDate(new Date()); // => true
 isDate('1970-01-01'); // => false
 
-/**
- * Check if value is an instance of DateConstructor
- * and has a valid timestamp
- */
-isValidDate(new Date(1970, 1, 1)); // => true
+/** Check if value is an instance of DateConstructor and has a valid timestamp */
+isValidDate(new Date()); // => true
 isValidDate(new Date('hello')); // => false
-isValidDate('1970-01-01'); // => false
 
 /** Check if typeof value is 'symbol' */
 isSymbol(Symbol(123)); // => true
@@ -117,9 +107,7 @@ isRegularObject([]); // => false
 isRegularObject(new Map()); // => false
 isRegularObject(new Date()); // => false
 
-/**
- * Check if value is an empty 'regular object'
- */
+/** Check if value is an empty 'regular object' (no enumerable properties) */
 isEmptyObject({}); // => true
 isEmptyObject({ foo: 'bar' }); // => false
 isEmptyObject([]); // => false
