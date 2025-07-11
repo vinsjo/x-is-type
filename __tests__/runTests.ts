@@ -65,32 +65,32 @@ const runFunctionTest = (
 };
 
 const argsByName: Record<ExportedFunctionName, TestFunctionValues> = {
-    isNum: [
-        ['', NaN, new Number()],
-        [1, 100, Infinity],
+    isNumber: [
+        ['', new Number()],
+        [1, 100, NaN, Infinity],
     ],
-    isStr: [
+    isString: [
         [1, null, {}, new String()],
         ['', String()],
     ],
-    isBool: [
+    isBoolean: [
         [1, null, {}],
         [true, false, Boolean()],
     ],
-    isObj: [
+    isObject: [
         [null, '', Symbol(1)],
         [{}, [], new Date()],
     ],
-    isArr: [
+    isArray: [
         [{}, new Set(), new Map()],
         [[], Array(1)],
     ],
-    isFn: [
+    isFunction: [
         [null, {}, 1],
         [() => {}, function () {}, class TestClass {}],
     ],
     isNull: [[undefined, false, 0, {}], [null]],
-    isUndef: [[null, 0, false, NaN], [undefined]],
+    isUndefined: [[null, 0, false, NaN], [undefined]],
     isNullish: [
         [false, 0, 'undefined', NaN],
         [null, undefined],
@@ -111,6 +111,10 @@ const argsByName: Record<ExportedFunctionName, TestFunctionValues> = {
         [{}, new Date().toString(), new Date('invalid')],
         [new Date(), new Date('1970-01-01')],
     ],
+    isValidNumber: [
+        [NaN, '1', {}, new Number()],
+        [1, 100, Infinity, -Infinity, 0],
+    ],
     isFalsy: [
         [1, ' ', true, [], {}],
         [null, undefined, false, 0, '', NaN],
@@ -119,13 +123,13 @@ const argsByName: Record<ExportedFunctionName, TestFunctionValues> = {
         [null, undefined, false, 0, '', NaN],
         [1, ' ', true, [], {}],
     ],
-    isEmptyObj: [
-        [null, '', Symbol(), { foo: 'bar' }, [1]],
-        [{}, [], new Set(), new Map()],
+    isEmptyObject: [
+        [null, '', Symbol(), { foo: 'bar' }, new Map(), new Set(), [], [1]],
+        [{}],
     ],
-    isRegularObj: [
+    isRegularObject: [
         [null, '', Symbol(1), [], new Set(), new Map()],
-        [{}, { foo: 'bar' }, { a: 1, b: 2 }, { x: 'y' }],
+        [{}, { foo: 'bar' }, { x: 'y' }],
     ],
 };
 

@@ -22,10 +22,15 @@ const { isNum, isStr, isObj } = require('x-is-type');
 This package includes the following functions for type checking of one or more variables.
 
 ```js
+/** Check if typeof value is 'number' */
+isNumber(1); // => true
+isNumber(NaN); // => true
+isNumber('1'); // => false
+
 /** Check if typeof value is 'number' and not NaN */
-isNum(1); // => true
-isNum('1'); // => false
-isNum(NaN); // => false
+isValidNumber(1); // => true
+isValidNumber(NaN); // => false
+isValidNumber('1'); // => false
 
 /** Check if value is a finite integer value */
 isInt(1); // => true
@@ -52,26 +57,30 @@ isBool(null); // => false
  * Check if typeof value is 'object',
  * not null and instances of ObjectConstructor
  */
-isObj({ foo: 'bar' }); // => true
-isObj([]); // => true
-isObj(new Set()); // => true
-isObj(null); // => false
+isObject({ foo: 'bar' }); // => true
+isObject([]); // => true
+isObject(new Set()); // => true
+isObject(null); // => false
 
-/** Check if value is an array, (uses Array.isArray) */
-isArr([1, 2, 3]); // => true
-isArr({}); // => false
+/**
+ * Check if value is an array.
+ *
+ * Uses `Array.isArray`, but with slightly different type definition.
+ */
+isArray([1, 2, 3]); // => true
+isArray({}); // => false
 
 /** Check if typeof value is 'function' */
-isFn(() => {}); // => true
-isFn({}); // => false
+isFunction(() => {}); // => true
+isFunction({}); // => false
 
 /** Check if value is null */
 isNull(null); // => true
 isNull(undefined); // => false
 
 /** Check if value is undefined */
-isUndef(undefined); // => true
-isUndef(null); // => false
+isUndefined(undefined); // => true
+isUndefined(null); // => false
 
 /** Check if value is null or undefined */
 isNullish(null); // => true
@@ -102,24 +111,30 @@ isMap({ foo: 'bar' }); // => false
 isSet(new Set()); // => true
 isSet(new Array()); // => false
 
-/** Check if value is an empty array or object */
+/** Check if value is a 'regular object' (not array, Map, Set, Date, etc.) */
+isRegularObject({}); // => true
+isRegularObject([]); // => false
+isRegularObject(new Map()); // => false
+isRegularObject(new Date()); // => false
+
+/**
+ * Check if value is an empty 'regular object'
+ */
 isEmptyObject({}); // => true
-isEmptyObject([]); // => true
 isEmptyObject({ foo: 'bar' }); // => false
-isEmptyObject([1, 2, 3]); // => false
+isEmptyObject([]); // => false
 isEmptyObject(new Map()); // => false
 isEmptyObject(null); // => false
 
-/** Check if value is a 'regular object' */
-isRegularObject({}); // => true
-isRegularObject([]); // => false
-isRegularObject(new Date()); // => false
-
 /** Check if x is any non-falsy value */
 isTruthy(1); // => true
+isTruthy({}); // => true
+isTruthy(null); // => false
 isTruthy(0); // => false
 
 /** Check if x is any falsy value */
 isFalsy(0); // => true
+isFalsy(null); // => true
 isFalsy(1); // => false
+isFalsy({}); // => false
 ```
