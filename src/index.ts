@@ -9,16 +9,6 @@ export type AnyObjectType = Record<PropertyKey, unknown>;
 export type EmptyObjectType = Partial<Record<PropertyKey, never>>;
 
 /**
- * Type representation of a function with unknown parameters and return type.
- */
-export type AnyFunctionType = (...args: unknown[]) => unknown;
-
-/**
- * Type representation of a constructor function with unknown parameters and return type.
- */
-export type AnyConstructorType = abstract new (...args: unknown[]) => unknown;
-
-/**
  * Type representation of any falsy value.
  *
  * This is not a complete type to represent all falsy values in JavaScript,
@@ -29,73 +19,94 @@ export type Falsy = null | undefined | false | 0 | '';
 /**
  * Check if typeof x is 'number'
  */
-export const isNumber = (x: unknown): x is number => typeof x === 'number';
+export function isNumber(x: unknown): x is number {
+    return typeof x === 'number';
+}
 
 /**
  * Check if typeof x is 'string'
  */
-export const isString = (x: unknown): x is string => typeof x === 'string';
+export function isString(x: unknown): x is string {
+    return typeof x === 'string';
+}
 
 /**
  * Check if typeof x is 'boolean'
  */
-export const isBoolean = (x: unknown): x is boolean => typeof x === 'boolean';
+export function isBoolean(x: unknown): x is boolean {
+    return typeof x === 'boolean';
+}
 
 /**
  * Check if typeof x is 'object' and it's not null.
  */
-export const isObject = (x: unknown): x is AnyObjectType =>
-    x !== null && typeof x === 'object';
+export function isObject(x: unknown): x is AnyObjectType {
+    return x !== null && typeof x === 'object';
+}
 
 /**
  * Check if x is an array (uses `Array.isArray`)
  */
-export const isArray = ((x: unknown): x is unknown[] => Array.isArray(x)) as {
-    (x: unknown[] | readonly unknown[]): boolean;
-    (x: unknown): x is unknown[];
-};
+export function isArray(x: unknown[] | readonly unknown[]): boolean;
+export function isArray(x: unknown): x is unknown[];
+export function isArray(x: unknown): x is unknown[] {
+    return Array.isArray(x);
+}
 
 /**
  * Check if typeof x is 'function'
  */
-export const isFunction = (x: unknown): x is (...args: unknown[]) => unknown =>
-    typeof x === 'function';
-
+export function isFunction(x: unknown): x is (...args: unknown[]) => unknown {
+    return typeof x === 'function';
+}
 /**
  * Check if x is null
  */
-export const isNull = (x: unknown): x is null => x === null;
+export function isNull(x: unknown): x is null {
+    return x === null;
+}
 
 /**
  * Check if x is undefined
  */
-export const isUndefined = (x: unknown): x is undefined => x === undefined;
+export function isUndefined(x: unknown): x is undefined {
+    return x === undefined;
+}
 
 /**
  * Check if x is undefined or null
  */
-export const isNullish = (x: unknown): x is undefined | null => x == null;
+export function isNullish(x: unknown): x is undefined | null {
+    return x == null;
+}
 
 /**
  * Check if x is instanceof DateConstructor
  */
-export const isDate = (x: unknown): x is Date => x instanceof Date;
+export function isDate(x: unknown): x is Date {
+    return x instanceof Date;
+}
 
 /**
  * Check if typeof x is 'symbol'
  */
-export const isSymbol = (x: unknown): x is symbol => typeof x === 'symbol';
+export function isSymbol(x: unknown): x is symbol {
+    return typeof x === 'symbol';
+}
 
 /**
  * Check if x is instanceof MapConstructor
  */
-export const isMap = (x: unknown): x is Map<unknown, unknown> =>
-    x instanceof Map;
+export function isMap(x: unknown): x is Map<unknown, unknown> {
+    return x instanceof Map;
+}
 
 /**
  * Check if x is instanceof SetConstructor
  */
-export const isSet = (x: unknown): x is Set<unknown> => x instanceof Set;
+export function isSet(x: unknown): x is Set<unknown> {
+    return x instanceof Set;
+}
 
 // TS UNCERTAIN RETURN TYPES
 //
@@ -108,12 +119,11 @@ export const isSet = (x: unknown): x is Set<unknown> => x instanceof Set;
  * Uses `isObject` to check if x is an object and also checks if
  * the prototype of x is `Object.prototype`.
  */
-export const isRegularObject = ((x: unknown): x is AnyObjectType => {
+export function isRegularObject(x: AnyObjectType): boolean;
+export function isRegularObject(x: unknown): x is AnyObjectType;
+export function isRegularObject(x: unknown): x is AnyObjectType {
     return isObject(x) && Object.getPrototypeOf(x) === Object.prototype;
-}) as {
-    (x: AnyObjectType): boolean;
-    (x: unknown): x is AnyObjectType;
-};
+}
 
 /**
  * Check if x is a 'regular object' without any enumerable properties.
@@ -131,54 +141,53 @@ export const isEmptyObject = (x: unknown): x is EmptyObjectType => {
 /**
  * Check if typeof x is 'number' and x is not NaN
  */
-export const isValidNumber = ((x: unknown): x is number => {
+export function isValidNumber(x: number): boolean;
+export function isValidNumber(x: unknown): x is number;
+export function isValidNumber(x: unknown): x is number {
     return isNumber(x) && !Number.isNaN(x);
-}) as {
-    (x: number): boolean;
-    (x: unknown): x is number;
-};
+}
 
 /**
  * Check if typeof x is 'number' and x is a finite integer value
  * (i.e., `x % 1 === 0`)
  */
-export const isInt = ((x: unknown): x is number => {
+export function isInt(x: number): boolean;
+export function isInt(x: unknown): x is number;
+export function isInt(x: unknown): x is number {
     return isNumber(x) && x % 1 === 0;
-}) as {
-    (x: number): boolean;
-    (x: unknown): x is number;
-};
+}
 
 /**
  * Check if typeof x is 'number', x is not
  * NaN and x is a float value
  */
-export const isFloat = ((x: unknown): x is number => {
+export function isFloat(x: number): boolean;
+export function isFloat(x: unknown): x is number;
+export function isFloat(x: unknown): x is number {
     if (!isNumber(x)) return false;
     const r = x % 1;
     return !Number.isNaN(r) && r !== 0;
-}) as {
-    (x: number): boolean;
-    (x: unknown): x is number;
-};
+}
 
 /**
  * Check if x is instanceof DateConstructor and it has a valid time value
  * (`x.getTime()` is not `NaN`)
  */
-export const isValidDate = ((x: unknown): x is Date => {
+export function isValidDate(x: Date): boolean;
+export function isValidDate(x: unknown): x is Date;
+export function isValidDate(x: unknown): x is Date {
     return isDate(x) && !Number.isNaN(x.getTime());
-}) as {
-    (x: Date): boolean;
-    (x: unknown): x is Date;
-};
-
+}
 /**
  * Check if x is any non-falsy value.
  *
  * This is functionally equivalent to `!!x`, but as a function with type definition.
  */
-export const isTruthy = <T>(x: T | Falsy): x is Exclude<typeof x, Falsy> => !!x;
+export function isTruthy<T>(x: T | Falsy): x is Exclude<typeof x, Falsy> {
+    return !!x;
+}
 
 /** Check if x is any falsy value */
-export const isFalsy = (x: unknown): x is Falsy => !x;
+export function isFalsy(x: unknown): x is Falsy {
+    return !x;
+}
