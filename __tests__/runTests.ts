@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { describe, expect, test } from '@jest/globals';
 
 /**
@@ -6,131 +5,56 @@ import { describe, expect, test } from '@jest/globals';
  */
 type Source = typeof import('../src');
 
-type TestFunctionValues = [
-    // Values where function is expected to return false
-    expectedFalseValues: unknown[],
-    // Values where function is expected to return true
-    expectedTrueValues: unknown[]
-];
-
 /**
  * Function names exported from the source module.
  */
-type ExportedFunctionName = Extract<keyof Source, string>;
+type ExportedTypeGuardFunctionName = Extract<
+    keyof {
+        [K in keyof Source as Source[K] extends (x: unknown) => boolean
+            ? K
+            : never]: Source[K];
+    },
+    string
+>;
 
+type TestFunctionValues = {
+    /**
+     * Values where function is expected to return false
+     */
+    expectFalse: unknown[];
+    /**
+     * Values where function is expected to return true
+     */
+    expectTrue: unknown[];
+};
+
+/**
+ * Stringify value passed to test function, for use in test name.
+ */
 const testValueToString = (value: unknown): string => {
     if (value == null || typeof value !== 'object') {
         return typeof value === 'string' ? `"${value}"` : String(value);
     }
+
+    if (value instanceof Date) {
+        return `Date(${value.toJSON()})`;
+    }
+
     if (
         Array.isArray(value) ||
         Object.getPrototypeOf(value) === Object.prototype
     ) {
         return JSON.stringify(value);
     }
-    if (value instanceof Date) {
-        return Number.isNaN(value.getTime()) ? 'Invalid Date' : 'Date';
-    }
 
     if (value instanceof Set || value instanceof Map) {
-        return `${value instanceof Set ? 'Set' : 'Map'}(${JSON.stringify([
-            ...value,
-        ])})`;
+        return (
+            (value instanceof Set ? 'Set' : 'Map') +
+            `(${JSON.stringify(Array.from(value))})`
+        );
     }
 
-    return value.toString();
-};
-
-const runFunctionTest = (
-    source: Source,
-    name: ExportedFunctionName,
-    [expectedFalseValues, expectedTrueValues]: TestFunctionValues
-) => {
-    const fn = source[name] as (value: unknown) => boolean;
-
-    const defineTests = (values: unknown[], expectedResult: boolean) => {
-        for (const value of values) {
-            test(`expect ${name}(${testValueToString(
-                value
-            )}) to return ${expectedResult}`, () => {
-                expect(fn(value)).toBe(expectedResult);
-            });
-        }
-    };
-
-    describe(name, () => {
-        defineTests(expectedFalseValues, false);
-        defineTests(expectedTrueValues, true);
-    });
-};
-
-const argsByName: Record<ExportedFunctionName, TestFunctionValues> = {
-    isNumber: [
-        ['', new Number()],
-        [1, 100, NaN, Infinity],
-    ],
-    isString: [
-        [1, null, {}, new String()],
-        ['', String()],
-    ],
-    isBoolean: [
-        [1, null, {}],
-        [true, false, Boolean()],
-    ],
-    isObject: [
-        [null, '', Symbol(1)],
-        [{}, [], new Date()],
-    ],
-    isArray: [
-        [{}, new Set(), new Map()],
-        [[], Array(1)],
-    ],
-    isFunction: [
-        [null, {}, 1],
-        [() => {}, function () {}, class TestClass {}],
-    ],
-    isNull: [[undefined, false, 0, {}], [null]],
-    isUndefined: [[null, 0, false, NaN], [undefined]],
-    isNullish: [
-        [false, 0, 'undefined', NaN],
-        [null, undefined],
-    ],
-    isDate: [[{}, new Date().toString(), 0], [new Date()]],
-    isSymbol: [[{}, [], '', 1], [Symbol()]],
-    isMap: [[[], {}, new Set()], [new Map()]],
-    isSet: [[[], {}, new Map()], [new Set()]],
-    isInt: [
-        [1.1, NaN, Infinity],
-        [1, 2, 3],
-    ],
-    isFloat: [
-        [1, NaN, Infinity],
-        [1.1, 3.14, 0.0000000001],
-    ],
-    isValidDate: [
-        [{}, new Date().toString(), new Date('invalid')],
-        [new Date(), new Date('1970-01-01')],
-    ],
-    isValidNumber: [
-        [NaN, '1', {}, new Number()],
-        [1, 100, Infinity, -Infinity, 0],
-    ],
-    isFalsy: [
-        [1, ' ', true, [], {}],
-        [null, undefined, false, 0, '', NaN],
-    ],
-    isTruthy: [
-        [null, undefined, false, 0, '', NaN],
-        [1, ' ', true, [], {}],
-    ],
-    isEmptyObject: [
-        [null, '', Symbol(), { foo: 'bar' }, new Map(), new Set(), [], [1]],
-        [{}],
-    ],
-    isRegularObject: [
-        [null, '', Symbol(1), [], new Set(), new Map()],
-        [{}, { foo: 'bar' }, { x: 'y' }],
-    ],
+    return String(value) || `[object ${value.constructor.name || 'Unknown'}]`;
 };
 
 /**
@@ -138,8 +62,120 @@ const argsByName: Record<ExportedFunctionName, TestFunctionValues> = {
  *
  * @param source - Exported functions from `src` or `dist`
  */
-export const runTests = async (source: Source) => {
-    (Object.keys(argsByName) as (keyof typeof argsByName)[]).forEach((name) => {
-        runFunctionTest(source, name, argsByName[name]);
-    });
+export const runTests = async (
+    source: Pick<Source, ExportedTypeGuardFunctionName>
+) => {
+    const argsByNameEntries = Object.entries({
+        isNumber: {
+            expectFalse: ['', new Number()],
+            expectTrue: [1, 100, NaN, Infinity],
+        },
+        isString: {
+            expectFalse: [1, null, {}, new String()],
+            expectTrue: ['', String()],
+        },
+        isBoolean: {
+            expectFalse: [1, null, {}],
+            expectTrue: [true, false, Boolean()],
+        },
+        isObject: {
+            expectFalse: [null, '', Symbol(1)],
+            expectTrue: [{}, [], new Date(), new FormData()],
+        },
+        isArray: {
+            expectFalse: [{}, new Set(), new Map()],
+            expectTrue: [[], Array(1)],
+        },
+        isFunction: {
+            expectFalse: [null, {}, 1],
+            expectTrue: [() => {}, function () {}, Map, Function],
+        },
+        isNull: {
+            expectFalse: [undefined, false, 0, {}],
+            expectTrue: [null],
+        },
+        isUndefined: {
+            expectFalse: [null, 0, false, NaN],
+            expectTrue: [undefined],
+        },
+        isNullish: {
+            expectFalse: [false, 0, 'undefined', NaN],
+            expectTrue: [null, undefined],
+        },
+        isDate: {
+            expectFalse: [{}, new Date().toString(), 0],
+            expectTrue: [new Date()],
+        },
+        isSymbol: {
+            expectFalse: [{}, [], '', 1],
+            expectTrue: [Symbol()],
+        },
+        isMap: {
+            expectFalse: [[], {}, new Set()],
+            expectTrue: [new Map()],
+        },
+        isSet: {
+            expectFalse: [[], {}, new Map()],
+            expectTrue: [new Set()],
+        },
+        isInt: {
+            expectFalse: [1.1, NaN, Infinity, -Infinity],
+            expectTrue: [0, 1, -100, 3_000_000_000],
+        },
+        isFloat: {
+            expectFalse: [1, NaN, Infinity, -Infinity],
+            expectTrue: [1.1, -0.1, 3.14, 0.0000000001],
+        },
+        isValidDate: {
+            expectFalse: [{}, new Date().toJSON(), new Date(NaN)],
+            expectTrue: [new Date(), new Date('1970-01-01')],
+        },
+        isValidNumber: {
+            expectFalse: [NaN, '1', {}, new Number()],
+            expectTrue: [1, 100, Infinity, -Infinity, 0],
+        },
+        isFalsy: {
+            expectFalse: [1, ' ', true, [], {}],
+            expectTrue: [null, undefined, false, 0, '', NaN],
+        },
+        isTruthy: {
+            expectFalse: [null, undefined, false, 0, '', NaN],
+            expectTrue: [1, ' ', true, [], {}],
+        },
+        isEmptyObject: {
+            expectFalse: [
+                null,
+                '',
+                { foo: 'bar' },
+                [],
+                [1],
+                new Map(),
+                new Set(),
+            ],
+            expectTrue: [{}],
+        },
+        isRegularObject: {
+            expectFalse: [null, '', Symbol(1), [], new Set(), new Map()],
+            expectTrue: [{}, { foo: 'bar' }],
+        },
+    } satisfies Record<ExportedTypeGuardFunctionName, TestFunctionValues>) as [
+        ExportedTypeGuardFunctionName,
+        TestFunctionValues,
+    ][];
+
+    for (const [name, args] of argsByNameEntries) {
+        const fn = source[name] as (value: unknown) => boolean;
+
+        const defineTests = (values: unknown[], expectedResult: boolean) => {
+            for (const value of values) {
+                const testName = `${name}(${testValueToString(value)}) returns ${expectedResult}`;
+                test(testName, () => expect(fn(value)).toBe(expectedResult));
+            }
+        };
+
+        describe(name, () => {
+            defineTests(args.expectTrue, true);
+            defineTests(args.expectFalse, false);
+        });
+    }
 };
